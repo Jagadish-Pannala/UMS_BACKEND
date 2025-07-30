@@ -39,9 +39,12 @@ class RoleService:
 
     def remove_permission_group_from_role(self, role_id: int, group_id: int):
         return role_dao.remove_permission_group_from_role(self.db, role_id, group_id)
+    
 
     def update_permission_groups_for_role(self, role_id: int, group_ids: list[int]):
         return role_dao.update_permission_groups_for_role(self.db, role_id, group_ids)
+    
+
 
     def get_permission_groups_by_role(self, role_id: int):
         return role_dao.get_permission_groups_by_role(self.db, role_id)
