@@ -51,3 +51,6 @@ class PermissionGroupService:
 
     def get_permission_by_code(self, code: str):
         return self.dao.get_permission_by_code(code)
+    
+    def get_unmapped_permissions(self, group_id: int):
+        return self.dao.get_unmapped_permissions(group_id)

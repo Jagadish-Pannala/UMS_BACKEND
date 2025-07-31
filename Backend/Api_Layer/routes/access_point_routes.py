@@ -33,6 +33,13 @@ def get_unmapped_access_points(
 ):
     return service.get_unmapped_access_points()
 
+@router.get("/unmapped-permissions")
+def get_unmapped_permissions(
+    _: dict = Depends(admin_required),
+    service: AccessPointService = Depends(get_access_point_service)
+):
+    return service.get_unmapped_permissions()
+
 
 @router.post("/", response_model=CreateAPResponse)
 def create_ap(

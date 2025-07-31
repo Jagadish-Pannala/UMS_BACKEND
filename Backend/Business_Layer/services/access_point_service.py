@@ -119,4 +119,15 @@ class AccessPointService:
             )
             for ap in all_aps if not ap.permission_mappings
         ]
+    
+    def get_unmapped_permissions(self):
+        permissions = self.dao.get_unmapped_permissions()
+        return [
+            {
+                "permission_id": perm.permission_id,
+                "code": perm.permission_code,
+                "description": perm.description
+            }
+            for perm in permissions
+        ]
 

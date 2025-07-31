@@ -160,3 +160,10 @@ class AccessPointDAO:
         self.db.delete(mapping)
         self.db.commit()
         return True
+    
+    def get_unmapped_permissions(self) -> List[Permissions]:
+        return (
+            self.db.query(Permissions)
+            .filter(~Permissions.access_mappings.any())
+            .all()
+        )

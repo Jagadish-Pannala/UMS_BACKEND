@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_
 from ..models.models import Permission_Group, Permission_Group_Mapping, Permissions
+from typing import List
 
 class PermissionGroupDAO:
     def __init__(self, db: Session):
@@ -125,4 +126,15 @@ class PermissionGroupDAO:
             self.db.delete(mapping)
         self.db.commit()
         return True
+    
+    def get_unmapped_permissions(self, group_id: int) -> List[Permissions]:
+        subquery = (
+            self.db.query(Permission_Group_Mapping.permission_id)
+            .filter(Permission_Group_Mapping.group_id == group_id)
+            .subquery()
+        )
+ 
+        query = self.db.query(Permissions).filter(Permissions.permission_id.notin_(subquery))
+ 
+        return query.all()
 

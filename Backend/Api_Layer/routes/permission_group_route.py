@@ -131,3 +131,15 @@ def remove_permissions_from_group(
     
     return {"message": "Permissions removed successfully"}
 
+@router.get("/{group_id}/unmapped-permissions", response_model=List[PermissionOut])
+def get_unmapped_permissions_for_group(
+    group_id: int,
+    service: PermissionGroupService = Depends(get_permission_group_service),
+    current_user: dict = Depends(get_current_user)
+):
+    group = service.get_group(group_id)
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+ 
+    return service.get_unmapped_permissions(group_id)
+

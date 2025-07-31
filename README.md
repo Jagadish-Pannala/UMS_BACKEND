@@ -6,8 +6,5 @@
 6. got to running_usl/docs (navigate to '/docs')
 7. use auth/login endpoint to login
 8. password for all the users is same: `Paves@123`
-<<<<<<< HEAD
 9. place your keys folder in path "UMS_Backend\Api_Layer\JWT\token_creation\keys"
-=======
 9. pull request for checking.
->>>>>>> 394eb933dd823ab0ed08733dd07288c3c835e3a2

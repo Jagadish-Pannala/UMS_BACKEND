@@ -132,6 +132,11 @@ INSERT INTO Permission_Group (group_name) VALUES
 ('Permission Group Management'),  -- ID 4
 
 ('Access Point Management');      -- ID 5
+
+INSERT INTO Permission_Group (group_name)
+
+VALUES ('newly_created_permissions_group');
+ 
  
  
 -- User Management
