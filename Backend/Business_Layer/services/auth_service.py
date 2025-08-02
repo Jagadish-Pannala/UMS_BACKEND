@@ -66,7 +66,7 @@ class AuthService:
         }
         access_token = token_create(token_data)
 
-        redirect = "/admin-dashboard" if "Admin" in roles or "Super Admin" in roles else "/home"
+        redirect = "/user-management" if "Admin" in roles or "Super Admin" in roles else "/home"
 
         return {
             "access_token": access_token,
@@ -75,9 +75,11 @@ class AuthService:
         }
     
     def handle_microsoft_callback(self, code: str):
-        # Step 1: Exchange code for token
+        print("1. Received code:", code)
+ 
         token_url = f"https://login.microsoftonline.com/{get_env_var('TENANT_ID')}/oauth2/v2.0/token"
-
+        print("2. Token URL:", token_url)
+ 
         data = {
             "client_id": get_env_var('CLIENT_ID'),
             "scope": "openid email",
@@ -86,24 +88,29 @@ class AuthService:
             "grant_type": "authorization_code",
             "client_secret": get_env_var('CLIENT_SECRET')
         }
-
+ 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         response = requests.post(token_url, data=data, headers=headers)
-
+        print("3. Token exchange status:", response.status_code)
+        print("4. Token response:", response.text)
+ 
         if response.status_code != 200:
             raise HTTPException(status_code=500, detail="Failed to exchange code for token")
-
+ 
         token_response = response.json()
         id_token = token_response.get("id_token")
-
+        print("5. ID Token:", id_token)
+ 
         if not id_token:
             raise HTTPException(status_code=400, detail="ID token not found in response")
-
-        # Step 2: Decode and verify the token (using JWKS public keys)
+ 
+        # Decode Token
         jwks_url = f"https://login.microsoftonline.com/{get_env_var('TENANT_ID')}/discovery/v2.0/keys"
+        print("6. JWKS URL:", jwks_url)
+ 
         jwk_client = PyJWKClient(jwks_url)
         signing_key = jwk_client.get_signing_key_from_jwt(id_token)
-
+ 
         try:
             payload = jwt.decode(
                 id_token,
@@ -112,23 +119,25 @@ class AuthService:
                 audience=get_env_var('CLIENT_ID'),
                 options={"verify_exp": True}
             )
+            print("7. Decoded payload:", payload)
         except jwt.PyJWTError as e:
             raise HTTPException(status_code=403, detail=f"Token verification failed: {str(e)}")
-
+ 
         email = payload.get("email") or payload.get("preferred_username")
+        print("8. Email from token:", email)
+ 
         if not email:
             raise HTTPException(status_code=400, detail="Email not found in token")
-
-        # Step 3: Find user by email
+ 
         dao = self._get_dao()
         user = dao.get_active_user_by_email(email)
         if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found or inactive")
-
+            raise HTTPException(status_code=404, detail="User not found or inactive")
+ 
         roles = dao.get_user_roles(user.user_id)
         group_ids = dao.get_permission_group_ids_for_user(user.user_id)
         permissions = dao.get_permissions_by_group_ids(group_ids)
-
+ 
         token_data = {
             "sub": str(user.user_id),
             "user_id": user.user_id,
@@ -137,10 +146,10 @@ class AuthService:
             "roles": roles,
             "permissions": permissions
         }
-
+ 
         access_token = token_create(token_data)
-        redirect = "/admin-dashboard" if "Admin" in roles or "Super Admin" in roles else "/home"
-
+        redirect = "/user-management" if "Admin" in roles or "Super Admin" in roles else "/home"
+ 
         return {
             "access_token": access_token,
             "token_type": "bearer",
